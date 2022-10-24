@@ -3,3 +3,12 @@ https://www.kaggle.com/datasets/unsdsn/world-happiness?resource=download
 https://fragilestatesindex.org/
 
 https://fragilestatesindex.org/excel/
+
+
+Fragility State Index - the higher the score the more fragile the country..."a focus on social and political cohesion and inclusiveness".
+
+https://ourworldindata.org/grapher/gdp-per-capita-worldbank
+
+
+https://www.openintro.org/data/index.php?data=cia_factbook
+
