@@ -7,6 +7,10 @@ https://fragilestatesindex.org/excel/
 
 Fragility State Index - the higher the score the more fragile the country..."a focus on social and political cohesion and inclusiveness".
 
+The Fragile States Index (FSI) is based on a conflict assessment framework for assessing the vulnerability of states to collapse. 
+The higher the score the more fragile the country, and the weaker its social and political cohesion.
+
+
 https://ourworldindata.org/grapher/gdp-per-capita-worldbank
 
 
