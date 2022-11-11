@@ -6,6 +6,35 @@
 
 # 1. What are the total marks (oral plus written divided by two) for each student for each subject? (2 marks)
 
+library(viridis)
+library(hrbrthemes)
+
+
+# Impute missing values
+avgmark <- sqldf("select AVG(Mark_Oral) from studentresult where Name = 'Mary Healy' AND Mark_Oral is not 'NA'")
+avgmark
+
+studentresult$Mark_Oral <- ifelse(is.na(studentresult$Mark_Oral), as.numeric(avgmark), studentresult$Mark_Oral)
+
+
+avgTotalResults <- sqldf('select Name, subject, 
+                                      sum(Mark_Written) as sum_Written, 
+                                      sum(Mark_Oral) as sum_Oral,
+                                      count(year) as Num_Years,
+                                      (((sum(Mark_Written)+sum(Mark_Oral))/2)/count(year)) as Overall_Avg
+                                      from studentresult group by Name, subject')
+
+View(avgTotalResults)
+
+
+gg <- ggplot(avgTotalResults,aes(x = Name, y = Overall_Avg, fill = Subject))
+gg <- gg + geom_bar(position = "stack", stat = "identity",width=0.4)
+gg <- gg + scale_fill_viridis(discrete = T, option = "E")
+gg <- gg + ggtitle("Student Body Marks") 
+gg <- gg + facet_wrap(~Subject)
+gg <- gg + theme_ipsum()
+gg <- gg + theme(legend.position = "bottom")
+print(gg)
 
 
 # 2. What is the relationship between age and mark? (2 marks)
