@@ -1,0 +1,20 @@
+The refinement topics for R visualisations...
+
+Add ggplot y-axis label for all bar charts
+https://www.cedricscherer.com/2021/07/05/a-quick-how-to-on-labelling-bar-graphs-in-ggplot2/
+https://rstudio-pubs-static.s3.amazonaws.com/3364_d1a578f521174152b46b19d0c83cbe7e.html
+https://environmentalcomputing.net/graphics/ggplot/ggplot-labels/
+
+
+
+Add ggplot x-axis label for all bar charts in facet wrap
+https://stackoverflow.com/questions/72050599/make-specific-x-axis-labels-for-each-facet-wrap-graph-in-r
+https://cran.r-project.org/web/packages/lemon/vignettes/facet-rep-labels.html
+https://stackoverflow.com/questions/69179661/how-do-i-add-an-x-axis-label-to-all-plots-in-facet-wrap
+
+
+Add score value within the bar charts
+
+ggplot(Data, aes(x = Year, y = Frequency, fill = Category, label = Frequency)) +
+  geom_bar(stat = "identity") +
+  geom_text(size = 3, position = position_stack(vjust = 0.5))
