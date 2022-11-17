@@ -5,9 +5,10 @@
 # Please place the visualisations underneath each question.
 
 # 1. What are the total marks (oral plus written divided by two) for each student for each subject? (2 marks)
-
+library(ggplot2)
 library(viridis)
 library(hrbrthemes)
+library(sqldf)
 
 
 # Impute missing values
@@ -27,12 +28,21 @@ avgTotalResults <- sqldf('select Name, subject,
 View(avgTotalResults)
 
 
-gg <- ggplot(avgTotalResults,aes(x = Name, y = Overall_Avg, fill = Subject))
+gg <- ggplot(avgTotalResults,aes(x = Name, y = Overall_Avg, fill = Subject, label = round(Overall_Avg, digits = 0)))
 gg <- gg + geom_bar(position = "stack", stat = "identity",width=0.4)
 gg <- gg + scale_fill_viridis(discrete = T, option = "E")
 gg <- gg + ggtitle("Student Body Marks") 
 gg <- gg + facet_wrap(~Subject)
 gg <- gg + theme_ipsum()
+gg <- gg + labs(y = "Average Marks")
+#gg <- gg + geom_text(aes(label = round(Overall_Avg, digits = 0), vjust=-0.3)) 
+#gg <- gg + geom_text(size = 3, position = position_stack(vjust = 0.5))
+gg <- gg + geom_label(
+  aes(label = round(Overall_Avg, digits = 0)), 
+  #vjust=-0.3,
+  size = 3, fontface = "bold", family = "Fira Sans",
+  ## turn into white box without outline
+  fill = "white", label.size = 0)
 gg <- gg + theme(legend.position = "bottom")
 print(gg)
 
