@@ -18,36 +18,52 @@ avgmark
 studentresult$Mark_Oral <- ifelse(is.na(studentresult$Mark_Oral), as.numeric(avgmark), studentresult$Mark_Oral)
 
 
+# SQL to Set Up Exercise 1 + Exercise 2
+
+# Convert date to a "real date" - Exercise 2
+studentresult$DOB <- as.Date(studentresult$DOB, '%d-%m-%Y')
+
+# Add today's date, also as a "real date" - Exercise 2
+studentresult$today <- as.Date(Sys.Date())
+
+
+# Average Result - Exercise 1
 avgTotalResults <- sqldf('select Name, subject, 
                                       sum(Mark_Written) as sum_Written, 
                                       sum(Mark_Oral) as sum_Oral,
                                       count(year) as Num_Years,
-                                      (((sum(Mark_Written)+sum(Mark_Oral))/2)/count(year)) as Overall_Avg
+                                      (((sum(Mark_Written)+sum(Mark_Oral))/2)/count(year)) as Overall_Avg,
+                                      floor((today-DOB)/365.25) as AGE
                                       from studentresult group by Name, subject')
 
 View(avgTotalResults)
 
 
-gg <- ggplot(avgTotalResults,aes(x = Name, y = Overall_Avg, fill = Subject, label = round(Overall_Avg, digits = 0)))
-gg <- gg + geom_bar(position = "stack", stat = "identity",width=0.4)
+gg <- ggplot(avgTotalResults,aes(x = Name, y = Overall_Avg, fill = Subject, 
+                                 label = round(Overall_Avg, digits = 0)))
+gg <- gg + geom_bar(position = "stack", stat = "identity", width=0.35)
 gg <- gg + scale_fill_viridis(discrete = T, option = "E")
 gg <- gg + ggtitle("Student Body Marks") 
-gg <- gg + facet_wrap(~Subject)
+gg <- gg + facet_wrap(~Subject, nrow = 1, scales = "free")
 gg <- gg + theme_ipsum()
-gg <- gg + labs(y = "Average Marks")
-#gg <- gg + geom_text(aes(label = round(Overall_Avg, digits = 0), vjust=-0.3)) 
-#gg <- gg + geom_text(size = 3, position = position_stack(vjust = 0.5))
+gg <- gg + labs(y = "Average Marks For Each Student")
 gg <- gg + geom_label(
   aes(label = round(Overall_Avg, digits = 0)), 
-  #vjust=-0.3,
+  vjust=1.15,
   size = 3, fontface = "bold", family = "Fira Sans",
   ## turn into white box without outline
   fill = "white", label.size = 0)
-gg <- gg + theme(legend.position = "bottom")
+gg <- gg + theme(legend.position = "none")
 print(gg)
 
 
+
 # 2. What is the relationship between age and mark? (2 marks)
+
+# Perform calculation for age
+studentMarkProfile <- sqldf("select DISTINCT(Name), AGE from avgTotalResults")
+
+View(studentMarkProfile)
 
 
 
