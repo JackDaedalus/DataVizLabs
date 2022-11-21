@@ -9,6 +9,7 @@ library(ggplot2)
 library(viridis)
 library(hrbrthemes)
 library(sqldf)
+library(tidyr) # tidy data
 
 
 # Impute missing values
@@ -29,15 +30,16 @@ studentresult$today <- as.Date(Sys.Date())
 
 # Average Result - Exercise 1
 avgTotalResults <- sqldf('select Name, subject, 
-                                      sum(Mark_Written) as sum_Written, 
-                                      sum(Mark_Oral) as sum_Oral,
+                                      sum(Mark_Written) as Sum_Written_Mrks, 
+                                      sum(Mark_Oral) as Sum_Oral_Mks,
                                       count(year) as Num_Years,
                                       (((sum(Mark_Written)+sum(Mark_Oral))/2)/count(year)) as Overall_Avg,
-                                      floor((today-DOB)/365.25) as AGE
+                                      floor((today-DOB)/365.25) as Age
                                       from studentresult group by Name, subject')
 
 View(avgTotalResults)
 
+# Question 1 Bar Graphs
 
 gg <- ggplot(avgTotalResults,aes(x = Name, y = Overall_Avg, fill = Subject, 
                                  label = round(Overall_Avg, digits = 0)))
@@ -61,19 +63,184 @@ print(gg)
 # 2. What is the relationship between age and mark? (2 marks)
 
 # Perform calculation for age
-studentMarkProfile <- sqldf("select DISTINCT(Name), AGE from avgTotalResults")
+studentMarkProfile <- sqldf("select DISTINCT(Name), subject, Age, 
+                             Overall_Avg as Average_Grade from avgTotalResults
+                             order by subject")
 
 View(studentMarkProfile)
 
 
+# Question 2 Point Graphs
+gg2 <- ggplot(data=studentMarkProfile, aes(x=Age, y= Average_Grade, group=1)) +
+  geom_line() +
+  geom_point(colour="black", size=2, shape=21, fill="white") +
+  facet_wrap(~Subject, nrow = 1, scales = "free") +
+  labs(y = "Average Marks For Each Student")
+print(gg2)
+
+# With the exception of Irish, mark scores drop as the student gets older.
+
 
 # 3. Did any students do better on their written compared with their oral (or vice versa)? (2 marks)
+
+# Build SQL for Mary Healy
+studentMarkComps <- sqldf("select Name, subject, Year,
+                             Mark_Written,
+                             Mark_Oral
+                             from studentresult
+                             where Name = 'Mary Healy'
+                             order by year asc")
+
+
+View(studentMarkComps)
+
+studentMarkComps_Reshape <- studentMarkComps %>% 
+  pivot_longer(c(Mark_Written, Mark_Oral), # values to pivot or reshape
+               names_to = "Exam_Type", # names will be
+               values_to = "Mark_Score") # values will be
+
+studentMarkComps_Reshape # replay myReshapedData
+
+
+# Question 3 Bar Graphs - Mary Healy
+gg3a <- ggplot(data=studentMarkComps_Reshape, aes(x=Year, y=Mark_Score, fill=Exam_Type)) +
+       geom_bar(stat="identity", position=position_dodge(), colour="black") +
+       scale_fill_manual(values=c("#999999", "#E69F00")) +
+       labs(y = "Student Marks") + 
+       facet_wrap(~Subject, nrow = 1, scales = "fixed") +
+       ggtitle('Mary Healy') 
+print(gg3a)
+
+
+
+# Build SQL for Hercule Poirot
+studentMarkComps <- sqldf("select Name, subject, Year,
+                             Mark_Written,
+                             Mark_Oral
+                             from studentresult
+                             where Name = 'Hercule Poirot'
+                             order by year asc")
+
+
+View(studentMarkComps)
+
+studentMarkComps_Reshape <- studentMarkComps %>% 
+  pivot_longer(c(Mark_Written, Mark_Oral), # values to pivot or reshape
+               names_to = "Exam_Type", # names will be
+               values_to = "Mark_Score") # values will be
+
+studentMarkComps_Reshape # replay myReshapedData
+
+
+# Question 3 Bar Graphs - Hercule Poirot
+gg3b <- ggplot(data=studentMarkComps_Reshape, aes(x=Year, y=Mark_Score, fill=Exam_Type)) +
+  geom_bar(stat="identity", position=position_dodge(), colour="black") +
+  scale_fill_manual(values=c("#009999", "#0000FF")) +
+  labs(y = "Student Marks") + 
+  facet_wrap(~Subject, nrow = 1, scales = "fixed") +
+  ggtitle('Hercule Poirot') 
+print(gg3b)
+
+
+
+
+# Build SQL for Joe O'Neil
+studentMarkComps <- sqldf("select Name, subject, Year,
+                             Mark_Written,
+                             Mark_Oral
+                             from studentresult
+                             where Name = 'Joe O''Neil'
+                             order by year asc")
+
+
+View(studentMarkComps)
+
+studentMarkComps_Reshape <- studentMarkComps %>% 
+  pivot_longer(c(Mark_Written, Mark_Oral), # values to pivot or reshape
+               names_to = "Exam_Type", # names will be
+               values_to = "Mark_Score") # values will be
+
+studentMarkComps_Reshape # replay myReshapedData
+
+
+# Question 3 Bar Graphs - Joe O'Neil
+gg3c <- ggplot(data=studentMarkComps_Reshape, aes(x=Year, y=Mark_Score, fill=Exam_Type)) +
+  geom_bar(stat="identity", position=position_dodge(), colour="black") +
+  labs(y = "Student Marks") + 
+  facet_wrap(~Subject, nrow = 1, scales = "fixed") +
+  ggtitle("Joe O''Neil") 
+print(gg3c)
+
+
+# All students have done better in some years on Written compared to Oral
+
 
 
 
 # 4. What subject obtained the best results on average? (2 marks)
 
+bestSubjectsAvgTbl <- sqldf("select sum(Mark_Written+Mark_Oral)/(count(Mark_Written)+count(Mark_Oral)) 
+                                    as Subject_Average,  
+                                    subject
+                                    from studentresult
+                                    group by subject")
+
+
+View(bestSubjectsAvgTbl)
+
+
+# Question 4 Bar Graphs - Best subject on Average
+gg4 <- ggplot(data=bestSubjectsAvgTbl, aes(x=reorder(Subject, +Subject_Average), 
+                                           y=Subject_Average, fill=Subject)) +
+  geom_bar(stat="identity", position=position_dodge(), colour="black") +
+  labs(y = "Average Subject Marks", x = "Subject") + 
+  ggtitle('Best Performing Subject (on Average)') + 
+  geom_label(
+    aes(label = paste(round(Subject_Average, digits = 0),"%")), 
+    vjust=1.15,
+    size = 3, fontface = "bold",
+    fill = "white", label.size = 0) +
+  theme(legend.position = "none")
+print(gg4)
+
+
+
+# Irish achieved best results on average
+
+
 
 
 
 # 5. What are the average results in oral exams across all subjects and all years per student? (2 marks)
+
+
+avgOralScore <- sqldf("select sum(Mark_Oral)/count(Mark_Oral)
+                                    as Oral_Subject_Average,  
+                                    Name
+                                    from studentresult
+                                    group by Name")
+
+
+View(avgOralScore)
+
+
+# Question 5 Bar Graphs - Best subject on Average
+gg5 <- ggplot(data=avgOralScore, aes(x=reorder(Name, +Oral_Subject_Average), 
+                                           y=Oral_Subject_Average, fill=Name)) +
+  geom_bar(stat="identity", position=position_dodge(), colour="black") +
+  labs(y = "Average Subject Marks in Oral Exams", x = "Student", face="bold") + 
+  ggtitle('Student Performance in Oral Exams') + 
+  geom_label(
+    aes(label = paste(round(Oral_Subject_Average, digits = 0),"%")), 
+    vjust=1.15,
+    size = 3, fontface = "bold",
+    fill = "white", label.size = 0) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size=12, face="bold", colour = "black"))
+print(gg5)
+
+
+# Avg Oral Scores; Mary = 81%, Joe = 70%, Hercule = 50%
+
+
+
