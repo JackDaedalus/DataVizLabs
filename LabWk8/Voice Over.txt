@@ -15,7 +15,40 @@ Ran SQL to cover Q1 and Q2
 Q2
 
 - Using same average marks from Q1
-- Line chart with 
+- Line chart with points
+- Single row facet wrap seemed a better option for visual comparison
+
+
+Q3
+
+- if I was doing this again I would run this in a loop but I did SQL/facet wrap for each student.
+- Did this before I looked at the next lab so I pivoted the dataset using pivot_longer function
+- Bar Chart plot is like the starting exercise in the next lab - bars of written and oral side by side.
+- Single row facet wrap for each student for year/subject
+- Chose different colours for each student.
+- At some point everyone has done better in written than oral. 
+
+
+
+
+Q4
+
+- Set up SQL for averages
+- Ordered barchart with label
+- Coloured by subject
+
+
+
+
+Q5
+
+- Set Up Sql again for aggregations
+- Another ordered bar chart with labels
+
+
+
+
+
 
 
 
