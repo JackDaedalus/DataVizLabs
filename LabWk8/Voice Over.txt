@@ -1,0 +1,22 @@
+Lab Wk8
+
+Q1
+
+Ran SQL to cover Q1 and Q2
+- Got Age - character conversion to date;
+- built up agregation in SQL for graph 1
+
+- Graph - used a facet wrap for the multiple bar charts
+- Graph - used some themes and labelling from some external research
+- Chose a different track for other questions because of presentation/format issues
+
+
+
+Q2
+
+- Using same average marks from Q1
+- Line chart with 
+
+
+
+
