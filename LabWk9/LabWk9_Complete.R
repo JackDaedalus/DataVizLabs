@@ -1,4 +1,4 @@
-# Lab - Week 0
+# Lab - Week 10
 
 # Recreate given graphs using RStudio and ggploy
 
@@ -192,15 +192,15 @@ wrtnMarksBySubject <- sqldf('select subject,
                                 from studentresult
                                 where year = 2015')
 
-View(wrtnMarksBySubject)
+#View(wrtnMarksBySubject)
 
 
 
 # Question 5 - Bubble Chart
 gg5 <- ggplot(data=wrtnMarksBySubject, aes(x=Subject, y=Mark_Written, 
                                            size=Mark_Oral, color=Subject_Mark)) +
-  geom_point(alpha=2.5) +
-  scale_size(range = c(5, 17), name="Oral Results") +
+  geom_point(alpha=1.5) +
+  scale_size(range = c(5, 15), name="Oral Results") +
   labs(y = "Written Exams Marks (%)", x = "Subject") + 
   ggtitle('Scatter Plot of Written Marks Results Against Subject (2015)') +
   theme(plot.title = element_text(size = 17),

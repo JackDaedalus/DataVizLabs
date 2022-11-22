@@ -1,7 +1,23 @@
-# Lab - Week 0
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
 
-# Recreate given graphs using RStudio and ggploy
 
+```{r}
+warning=FALSE
+```
+###
+###
+###
+# Lab - Week 10
+
+# Recreate given graphs using RStudio and ggplot
+
+
+```{r}
 # Load libraries
 library(ggplot2)
 library(viridis)
@@ -15,7 +31,17 @@ avgmark <- sqldf("select AVG(Mark_Oral) from studentresult where Name = 'Mary He
 avgmark
 
 studentresult$Mark_Oral <- ifelse(is.na(studentresult$Mark_Oral), as.numeric(avgmark), studentresult$Mark_Oral)
+```
 
+
+
+###
+###
+
+#### Exercise 1: Looking at last week’s studentresults file, 
+#### plot the results for the written and oral exams in two bars per student. (4 marks)
+
+```{r}
 
 ###############################################################################################################
 # Exercise 1: Looking at last week’s studentresults file, 
@@ -59,7 +85,18 @@ gg1 <- ggplot(data=studentMarkComps_Reshape, aes(x=reorder(Name, +Mark_Score), y
   scale_fill_discrete(labels=c('Marks - Written', 'Marks - Oral'),name = "Exam Type") 
 print(gg1)
 
+```
 
+
+
+
+
+
+
+#### Exercise 2: Plot one variable counting the instances that fall in each bin (Histogram). 
+#### Bin size can be adjusted with the command binwidth. (1 mark)
+
+```{r}
 
 ###############################################################################################################
 # Exercise 2: Plot one variable counting the instances that fall in each bin (Histogram). 
@@ -84,9 +121,17 @@ ggplot(histMarksWrittenData, aes(x=Mark_Written)) +
         axis.text.x = element_text(size=15, face="bold", colour = "black"))
 
 
+```
 
 
 
+
+
+
+
+#### Exercise 3: Change the orientation of a bar chart to be horizontal rather than vertical. (1 mark)
+
+```{r}
 
 ###############################################################################################################
 # Exercise 3: Change the orientation of a bar chart to be horizontal rather than vertical. (1 mark)
@@ -108,15 +153,24 @@ gg3 <- ggplot(data=diffWrtnOral_Score, aes(x=Name, y=Written_Oral_Diff)) +
   geom_bar(stat="identity", colour="black", fill="blue") +
   labs(y = "Average % Difference", x = "Student Name") + 
   ggtitle('Average Difference Between Written and Oral Marks (per Student)') +
-  theme(plot.title = element_text(size = 17),
-        axis.title = element_text(size = 15),
+  theme(plot.title = element_text(size = 14),
+        axis.title = element_text(size = 14),
         axis.text.y = element_text(size=12, face="bold", colour = "black")) +
   coord_flip()
 print(gg3)
 
 
+```
 
 
+
+
+
+
+#### Exercise 4: Part ONE: Fit a line to a scatter plot of age against Written Marks. (1 mark)
+
+```{r}
+warning=FALSE
 ###############################################################################################################
 # Exercise 4: Part ONE: Fit a line to a scatter plot of age against Written Marks. (1 mark)
 ###############################################################################################################
@@ -152,7 +206,16 @@ print(gg4a)
 
 
 
+```
 
+
+
+
+
+
+#### Exercise 4: Part TWO: Create a scatter plot with a separate line for each data series (per subject). (1 mark)
+
+```{r}
 
 
 ###############################################################################################################
@@ -174,9 +237,18 @@ print(gg4b)
 
 
 
+```
 
 
 
+
+
+
+
+#### Exercise 5: Create a bubble chart using ggplot by creating a scatter plot and adding the third dimension in 
+#### the aesthetic option size. A fourth dimension can be added using the colour fill. (2 marks)
+
+```{r}
 
 ###############################################################################################################
 # Exercise 5: Create a bubble chart using ggplot by creating a scatter plot and adding the third dimension in 
@@ -192,7 +264,7 @@ wrtnMarksBySubject <- sqldf('select subject,
                                 from studentresult
                                 where year = 2015')
 
-View(wrtnMarksBySubject)
+#View(wrtnMarksBySubject)
 
 
 
@@ -200,7 +272,7 @@ View(wrtnMarksBySubject)
 gg5 <- ggplot(data=wrtnMarksBySubject, aes(x=Subject, y=Mark_Written, 
                                            size=Mark_Oral, color=Subject_Mark)) +
   geom_point(alpha=2.5) +
-  scale_size(range = c(5, 17), name="Oral Results") +
+  scale_size(range = c(5, 13), name="Oral Results") +
   labs(y = "Written Exams Marks (%)", x = "Subject") + 
   ggtitle('Scatter Plot of Written Marks Results Against Subject (2015)') +
   theme(plot.title = element_text(size = 17),
@@ -210,6 +282,4 @@ gg5 <- ggplot(data=wrtnMarksBySubject, aes(x=Subject, y=Mark_Written,
 print(gg5)
 
 
-
-
-
+```
