@@ -1,5 +1,20 @@
+---
+title: "Visualisation in R Part 3 - Lab 8"
+output: html_notebook
+---
 
 
+
+#  Visualisation in R Part 3
+## Lab 8
+
+```{r}
+warning=FALSE
+```
+
+
+
+```{r}
 # Load libraries
 library(readr)
 library(ggplot2)
@@ -8,7 +23,12 @@ library(viridis)
 library(hrbrthemes)
 library(dplyr)
 library(tidyr)
+```
 
+
+### Initial Data Load/Cleaning Routines
+
+```{r}
 # Read CSV file with Olympoic Data
 olympicdata<- read.csv( 'OlympicGames.csv' , sep= ',' , header=T)
 
@@ -37,26 +57,14 @@ resultsmedalsbronze<-sqldf("select country,
 # Combine medals dataframes
 resultsmedals<-merge(resultsmedalsgold,resultsmedalssilver,by="Country",all=TRUE) 
 resultsmedals2<-merge(resultsmedals,resultsmedalsbronze,by="Country",all=TRUE)
+```
 
 
-# Checking for NA Values - using North Korea as an example
-resultsmedalsNK2<-sqldf("select * from
-                          resultsmedals2 
-                          where Country=='North Korea'")
-resultsmedalsNK2
-
-# Replace NA values with zero
-resultsmedals2[is.na(resultsmedals2)] <- 0
-# Check NA values converted to zero - using North Korea as an example
-resultsmedalsNK2<-sqldf("select * from
-                          resultsmedals2 
-                          where Country=='North Korea'")
-resultsmedalsNK2
+### Visualization One - What country has won most Silver medals since 2000? (2 marks)
 
 
-
-# Visualization One - What country has won most Silver medals since 2000? (2 marks)
-
+```{r}
+# SQL dataframe generation
 dfMostSilverMedalsCountry<-sqldf("select country, 
                             count(Medal) as Silver 
                             from olympicdata 
@@ -66,7 +74,7 @@ dfMostSilverMedalsCountry<-sqldf("select country,
                             order by Silver desc
                             limit 7") 
 
-
+# Display dataframe
 dfMostSilverMedalsCountry
 
 # Visualization 1 - Horizontal Bar Chart of top performing silver medalist countries
@@ -86,14 +94,12 @@ gg1 <- ggplot(data=dfMostSilverMedalsCountry, aes(x=reorder(Country, +Silver), y
     ## turn into white box without outline
     fill = "white", label.size = 0.5)
 print(gg1)
-
-
-
-
+```
 
 # Visualization Two - How is the gender balance among the United States gold medalist? (2 marks)
 
-
+```{r}
+# SQL dataframe generation
 dfUSGoldMedalsGenderBal<-sqldf("select gender, 
                             count(Medal) as Gold 
                             from olympicdata 
@@ -102,7 +108,7 @@ dfUSGoldMedalsGenderBal<-sqldf("select gender,
                             group by gender
                             order by Gold desc") 
 
-
+# Display dataframe
 dfUSGoldMedalsGenderBal
 
 
@@ -121,11 +127,12 @@ gg2 <- ggplot(dfUSGoldMedalsGenderBal,aes(x=reorder(Gender, -Gold), y = Gold, fi
     size = 5, fontface = "bold",
     fill = "white", label.size = 1)  
 print(gg2)
-
-
+```
 
 # Visualization Three - What are the best sports for Sweden, USA, Austria and Switzerland? (2 marks)
 
+```{r}
+# SQL dataframe generation - four seperate SQL queries for each country
 dfBestSportsSweden<-sqldf("select Country, Sport, 
                             count(Medal) as Medal_Count 
                             from olympicdata 
@@ -134,8 +141,6 @@ dfBestSportsSweden<-sqldf("select Country, Sport,
                             order by Medal_Count desc
                             limit 3") 
 
-
-dfBestSportsSweden
 
 dfBestSportsUSA<-sqldf("select Country, Sport, 
                             count(Medal) as Medal_Count 
@@ -146,8 +151,6 @@ dfBestSportsUSA<-sqldf("select Country, Sport,
                             limit 3") 
 
 
-dfBestSportsUSA
-
 dfBestSportsSwitzerland<-sqldf("select Country, Sport, 
                             count(Medal) as Medal_Count 
                             from olympicdata 
@@ -156,8 +159,6 @@ dfBestSportsSwitzerland<-sqldf("select Country, Sport,
                             order by Medal_Count desc
                             limit 3") 
 
-
-dfBestSportsSwitzerland
 
 dfBestSportsAustria<-sqldf("select Country, Sport, 
                             count(Medal) as Medal_Count 
@@ -168,16 +169,14 @@ dfBestSportsAustria<-sqldf("select Country, Sport,
                             limit 3") 
 
 
-dfBestSportsAustria
-
-
+# Merge dataframes 
 resultsBestSports<-merge(dfBestSportsSweden,dfBestSportsUSA,all=TRUE) 
 resultsBestSports<-merge(resultsBestSports,dfBestSportsSwitzerland,all=TRUE)
 resultsBestSports<-merge(resultsBestSports,dfBestSportsAustria,all=TRUE)  
-resultsBestSports  
 
 
 
+# Visualization Three - Facet Wrap Bar Charts 
 gg3 <- ggplot(resultsBestSports,aes(x = reorder(Sport,-Medal_Count), y = Medal_Count, fill=Sport)) + 
   geom_bar(position = "stack", stat = "identity", colour="black") + 
   ggtitle("Best Sports - Austria, Sweden, Switzerland, USA") + 
@@ -185,34 +184,16 @@ gg3 <- ggplot(resultsBestSports,aes(x = reorder(Sport,-Medal_Count), y = Medal_C
   labs(y = "Medal Count For Each Country", x = "Sport") + 
   theme_ipsum()  +
   theme(legend.position = "top",
-        plot.title = element_text(size = 20),
+        plot.title = element_text(size = 15),
         axis.title = element_text(size = 10),
         axis.text.y = element_text(size=10, face="bold", colour = "black")) 
 print(gg3)
 
-
+```
 
 # Visualization Four - Who has the most total medals? (2 marks)
 
-
-#world<-map_data('world')
-
-#world <- mutate(world, fill = case_when(
-#  region %in% c("USA") ~ "blue", 
-#  region %in% c("China") ~ "red", 
-#  TRUE ~ "white"))
-
-#ggplot(world, aes(long, lat, fill = fill, group = group)) +
-#  xlim(-180,180)+ ylim (-50,100) +
-#  geom_map(map = world, aes(map_id = region), fill="white", color="grey") +
-#  geom_polygon(colour="gray") +
-#  scale_fill_identity() +
-#  theme_void() + #let's view South America
-#  labs(title = "Most Successful Countries in Olympics - by Medal count") 
-
-
-
-resultsmedals2
+```{r}
 
 # Pivot table to prepare data for bar chart
 resultsMedals_Reshape <- resultsmedals2 %>% 
@@ -220,19 +201,15 @@ resultsMedals_Reshape <- resultsmedals2 %>%
                names_to = "Medal_Type", # Rename column for exam type (written or oral)
                values_to = "Medal_Number") # Re-name column containing the exam scores
 
-resultsMedals_Reshape
 
 
+# SQL to build dataframes
 dfTop5MedalWinners<-sqldf("select Country,
                             sum(Medal_Number) as Total_Medal_Count 
                             from resultsMedals_Reshape 
                             group by Country
                             order by Total_Medal_Count desc
                             limit 7") 
-
-
-dfTop5MedalWinners
-
 
 
 dfTopMedalWinners<-sqldf("select Country, Medal_Type,
@@ -243,8 +220,6 @@ dfTopMedalWinners<-sqldf("select Country, Medal_Type,
                             group by Country, Medal_Type
                             order by Country, Total_Medal_Count desc") 
 
-
-dfTopMedalWinners
 
 #convert 'position' to factor and specify level order
 dfTopMedalWinners$Medal_Type <- factor(dfTopMedalWinners$Medal_Type, levels=c('gold', 'silver', 'bronze'))
@@ -268,12 +243,10 @@ ggplot(dfTopMedalWinners,aes(x=reorder(Country,-Total_Medal_Count), fill=Medal_T
         axis.title = element_text(size = 15),
         axis.text.y = element_text(size=12, face="bold", colour = "black"),
         axis.text.x = element_text(size=12, face="bold", colour = "black"))
-
-
-
-
+```
 # Visualization Five - What is the variation and spread of ages amongst gold and silver medalists? (2 marks)
 
+```{r}
 # Remove Rows with missing values for Age
 dfOlympicAgesCleaned<-na.omit(olympicdata)
 
@@ -313,5 +286,5 @@ ggplot(dfAgesGold_and_SilverWinners, aes(x=Medal_Rank, y=Athlete_Age, fill=Medal
         plot.title = element_text(size = 17),
         axis.title = element_text(size = 15),
         axis.text.x = element_text(size=15, face="bold", colour = "black"))
-
+```
 

@@ -57,6 +57,8 @@ resultsmedalsNK2
 
 # Visualization One - What country has won most Silver medals since 2000? (2 marks)
 
+
+# SQL dataframe generation
 dfMostSilverMedalsCountry<-sqldf("select country, 
                             count(Medal) as Silver 
                             from olympicdata 
@@ -66,7 +68,7 @@ dfMostSilverMedalsCountry<-sqldf("select country,
                             order by Silver desc
                             limit 7") 
 
-
+# Display dataframe
 dfMostSilverMedalsCountry
 
 # Visualization 1 - Horizontal Bar Chart of top performing silver medalist countries
@@ -93,7 +95,7 @@ print(gg1)
 
 # Visualization Two - How is the gender balance among the United States gold medalist? (2 marks)
 
-
+# SQL dataframe generation
 dfUSGoldMedalsGenderBal<-sqldf("select gender, 
                             count(Medal) as Gold 
                             from olympicdata 
@@ -102,7 +104,7 @@ dfUSGoldMedalsGenderBal<-sqldf("select gender,
                             group by gender
                             order by Gold desc") 
 
-
+# Display dataframe
 dfUSGoldMedalsGenderBal
 
 
@@ -126,6 +128,7 @@ print(gg2)
 
 # Visualization Three - What are the best sports for Sweden, USA, Austria and Switzerland? (2 marks)
 
+# SQL dataframe generation - four seperate SQL queries for each country
 dfBestSportsSweden<-sqldf("select Country, Sport, 
                             count(Medal) as Medal_Count 
                             from olympicdata 
@@ -134,8 +137,6 @@ dfBestSportsSweden<-sqldf("select Country, Sport,
                             order by Medal_Count desc
                             limit 3") 
 
-
-dfBestSportsSweden
 
 dfBestSportsUSA<-sqldf("select Country, Sport, 
                             count(Medal) as Medal_Count 
@@ -146,8 +147,6 @@ dfBestSportsUSA<-sqldf("select Country, Sport,
                             limit 3") 
 
 
-dfBestSportsUSA
-
 dfBestSportsSwitzerland<-sqldf("select Country, Sport, 
                             count(Medal) as Medal_Count 
                             from olympicdata 
@@ -156,8 +155,6 @@ dfBestSportsSwitzerland<-sqldf("select Country, Sport,
                             order by Medal_Count desc
                             limit 3") 
 
-
-dfBestSportsSwitzerland
 
 dfBestSportsAustria<-sqldf("select Country, Sport, 
                             count(Medal) as Medal_Count 
@@ -168,16 +165,14 @@ dfBestSportsAustria<-sqldf("select Country, Sport,
                             limit 3") 
 
 
-dfBestSportsAustria
-
-
+# Merge dataframes 
 resultsBestSports<-merge(dfBestSportsSweden,dfBestSportsUSA,all=TRUE) 
 resultsBestSports<-merge(resultsBestSports,dfBestSportsSwitzerland,all=TRUE)
 resultsBestSports<-merge(resultsBestSports,dfBestSportsAustria,all=TRUE)  
-resultsBestSports  
 
 
 
+# Visualization Three - Facet Wrap Bar Charts 
 gg3 <- ggplot(resultsBestSports,aes(x = reorder(Sport,-Medal_Count), y = Medal_Count, fill=Sport)) + 
   geom_bar(position = "stack", stat = "identity", colour="black") + 
   ggtitle("Best Sports - Austria, Sweden, Switzerland, USA") + 
@@ -212,7 +207,6 @@ print(gg3)
 
 
 
-resultsmedals2
 
 # Pivot table to prepare data for bar chart
 resultsMedals_Reshape <- resultsmedals2 %>% 
@@ -220,19 +214,15 @@ resultsMedals_Reshape <- resultsmedals2 %>%
                names_to = "Medal_Type", # Rename column for exam type (written or oral)
                values_to = "Medal_Number") # Re-name column containing the exam scores
 
-resultsMedals_Reshape
 
 
+# SQL to build dataframes
 dfTop5MedalWinners<-sqldf("select Country,
                             sum(Medal_Number) as Total_Medal_Count 
                             from resultsMedals_Reshape 
                             group by Country
                             order by Total_Medal_Count desc
                             limit 7") 
-
-
-dfTop5MedalWinners
-
 
 
 dfTopMedalWinners<-sqldf("select Country, Medal_Type,
@@ -243,8 +233,6 @@ dfTopMedalWinners<-sqldf("select Country, Medal_Type,
                             group by Country, Medal_Type
                             order by Country, Total_Medal_Count desc") 
 
-
-dfTopMedalWinners
 
 #convert 'position' to factor and specify level order
 dfTopMedalWinners$Medal_Type <- factor(dfTopMedalWinners$Medal_Type, levels=c('gold', 'silver', 'bronze'))
