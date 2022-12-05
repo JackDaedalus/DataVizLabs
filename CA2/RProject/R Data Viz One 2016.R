@@ -36,7 +36,6 @@ sGitHub_Datasource <- paste(sGitHub_Datasource2,sGitHub_Datafile, sep = "", coll
 
 county_map_source <- sGitHub_Datasource
 
-#county_map_source <- "https://github.com/JackDaedalus/DataVizLabs/raw/dfa3d486a5ea74a588e9768141b35f570eff3c57/CA2/Counties_-_OSi_National_Statutory_Boundaries_-_2019_-_Generalised_20m.zip"
 
 temp_1 <- tempfile()
 temp_2 <- tempfile()
