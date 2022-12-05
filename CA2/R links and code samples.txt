@@ -52,6 +52,10 @@ Link address...
 
 https://www.cso.ie/en/media/csoie/census/census2011boundaryfiles/26counties/26_Counties.zip
 
+https://data-osi.opendata.arcgis.com/maps/osi::counties-osi-national-statutory-boundaries-2019-generalised-20m
+
+
+
 
 Theme data...
 
@@ -71,7 +75,10 @@ sf_Ireland <- read_sf(file.path(temp_2,"0d80d6a5-6314-4a4b-ac2f-09f3767f054b2020
 
 
 
-This file also includes some variables relating to 2011, which we’re going to drop. Due to some small area boundary changes between 2011 and 2016 (some combined, some split), there are some rows which have no 2016 score/ranking, so we’ll also drop those. I’m also going to rename the ‘ID_LABEL’ variable to make things more straight-forward later.
+This file also includes some variables relating to 2011, which we’re going to drop. 
+Due to some small area boundary changes between 2011 and 2016 (some combined, some split), 
+there are some rows which have no 2016 score/ranking, so we’ll also drop those. 
+I’m also going to rename the ‘ID_LABEL’ variable to make things more straight-forward later.
 
 ndi <- read_csv("https://raw.githubusercontent.com/will-ball/Ireland-Deprivation-Mapping/master/Data/2016dep.csv") %>%
   select(-Population_2011, -Score_2011, -Decile_2011) %>%
