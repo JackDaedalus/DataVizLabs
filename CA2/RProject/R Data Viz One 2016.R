@@ -25,8 +25,6 @@ library(dplyr)
 
 
 
-#"https://github.com/JackDaedalus/DataVizLabs/raw/dfa3d486a5ea74a588e9768141b35f570eff3c57/CA2/Counties_-_OSi_National_Statutory_Boundaries_-_2019_-_Generalised_20m.zip"
-
 sGitHub_Datasource1 <-"https://github.com/JackDaedalus/DataVizLabs/raw/"
 sGitHub_Datasource2 <- paste(sGitHub_Datasource1,"dfa3d486a5ea74a588e9768141b35f570eff3c57/CA2/", sep = "", collapse=NULL)
 sGitHub_Datafile <- "Counties_-_OSi_National_Statutory_Boundaries_-_2019_-_Generalised_20m.zip"
@@ -55,11 +53,11 @@ spdf.points <- fortify(spdf, region="id")
 counties <- inner_join(spdf.points, spdf@data, by="id")
 
 
-
+f2016CTY_data <- "https://github.com/JackDaedalus/DataVizLabs/blob/3680d967d6d039018dcf2f39860f604d7db15908/CA2/SAPS2016_CTY31.csv"
 # Load Census Theme Data for 2011 for Irish counties
 # Select only the required unemployment data 
 # Rename the columns to increase understanding of the data
-df2011CountyThemes <- read_delim("https://www.cso.ie/en/media/csoie/census/documents/saps2011files/AllThemesTablesCTY.csv",show_col_types = FALSE) %>%
+df2011CountyThemes <- read_delim(f2016CTY_data,show_col_types = FALSE) %>%
   select(GEOGID, GEOGDESC, T8_1_LFFJT, T8_1_ULGUPJT, T8_1_TT) %>%
   rename(Looking_for_Work = T8_1_LFFJT, Unemployed = T8_1_ULGUPJT, Total_Workforce = T8_1_TT)
 
