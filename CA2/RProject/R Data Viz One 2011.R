@@ -32,11 +32,8 @@ sGitHub_Datasource2 <- paste(sGitHub_Datasource1,"dfa3d486a5ea74a588e9768141b35f
 sGitHub_Datafile <- "Counties_-_OSi_National_Statutory_Boundaries_-_2019_-_Generalised_20m.zip"
 sGitHub_Datasource <- paste(sGitHub_Datasource2,sGitHub_Datafile, sep = "", collapse=NULL)
 
-
-
 county_map_source <- sGitHub_Datasource
 
-#county_map_source <- "https://github.com/JackDaedalus/DataVizLabs/raw/dfa3d486a5ea74a588e9768141b35f570eff3c57/CA2/Counties_-_OSi_National_Statutory_Boundaries_-_2019_-_Generalised_20m.zip"
 
 temp_1 <- tempfile()
 temp_2 <- tempfile()
@@ -255,8 +252,8 @@ head(df2011CountyThemes)
 
 # Using cut to create categorical bands for rates of unemployment
 df2011CountyThemes$Unemploy_Pct <- cut(df2011CountyThemes$Unemploy_Rate, 
-                                       breaks = c(0, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 99), 
-                                       labels = c("<10%", "10-11%", "11-12%", "12-13%", "13-14%", "14-15%", "15%+"))
+                                       breaks = c(0, 6.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 99), 
+                                       labels = c("<7%", "7-10%", "10-11%", "11-12%", "12-13%", "13-14%", "14-15%", "15%+"))
 
 
 str(df2011CountyThemes)
@@ -276,12 +273,12 @@ view(df2011CountyThemes)
 
 
 # define a base map layer
-IRLCounty_BaseLayer <- ggplot(dfCountyMap) + 
-  aes(long, lat, group=group) +
-  geom_polygon(colour="grey")
+#IRLCounty_BaseLayer <- ggplot(dfCountyMap) + 
+#  aes(long, lat, group=group) +
+#  geom_polygon(colour="grey")
 
 # plot a data column 
-IRLCounty_BaseLayer + aes(fill=Unemploy_Pct)
+#IRLCounty_BaseLayer + aes(fill=Unemploy_Pct)
 
 
 
@@ -299,9 +296,9 @@ ggplot(dfCountyMap) +
         panel.grid = element_blank(),
         plot.caption.position = 'plot',
         plot.title.position = 'plot',
-        legend.position = "bottom")+ 
-  scale_fill_discrete(name = "Unemployment Rate (%)") +
-  #scale_fill_brewer(palette="YlOrRd")
-  scale_fill_brewer(palette="OrRd")
+        legend.position = "bottom") + 
+  #scale_fill_brewer(palette="OrRd") + 
+  labs(fill = "Unemployment Rate (%)")+
+  scale_fill_brewer(palette="YlOrRd")
 
 
