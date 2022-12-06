@@ -27,116 +27,170 @@ library(scales)
 
 
 
-# Load Census Theme Data for 2011 for Irish counties
-# Select only the required Socio-economic data 
-# Rename the columns to increase understanding of the data
-df2011CountySocioThemes <- read_delim("https://www.cso.ie/en/media/csoie/census/documents/saps2011files/AllThemesTablesCTY.csv",
-                                 show_col_types = FALSE) %>%   # Read Census 2011 data from CSO website
-  select(GEOGID, GEOGDESC, # Only select the county identifier and the numbers of people in each
-          T9_2_PA,         # Socio-economic group
-          T9_2_PB,
-          T9_2_PC,
-          T9_2_PD,
-          T9_2_PE,
-          T9_2_PF,
-          T9_2_PG,
-          T9_2_PH,
-          T9_2_PI,
-          T9_2_PJ,
-          T9_2_PZ) %>%
-  rename(GroupA = T9_2_PA,  # Rename Columns to improve readability
-         GroupB = T9_2_PB,
-         GroupC = T9_2_PC,
-         GroupD = T9_2_PD,
-         GroupE = T9_2_PE,
-         GroupF = T9_2_PF,
-         GroupG = T9_2_PG,
-         GroupH = T9_2_PH,
-         GroupI = T9_2_PI,
-         GroupJ = T9_2_PJ,
-         GroupZ = T9_2_PZ)
+# Load Census Theme Data for 2016 for Irish counties
+sGitHub_Datasource1_2016 <-"https://github.com/JackDaedalus/DataVizLabs/raw/"
+sGitHub_Datasource2_2016 <- paste(sGitHub_Datasource1_2016,"main/CA2/", sep = "", collapse=NULL)
+sGitHub_Datafile_2016 <- "SAPS2016_CTY31.zip"
+sGitHub_Datasource_2016 <- paste(sGitHub_Datasource2_2016,sGitHub_Datafile_2016, sep = "", collapse=NULL)
 
-View(df2011CountySocioThemes)
+f2016CTY_data <- sGitHub_Datasource_2016
+
+# Download zip fril from GitHub and extract 2016 Theme data for Irish counties
+temp_3 <- tempfile()
+temp_4 <- tempfile()
+source <- f2016CTY_data
+temp_3 <- curl_download(url = source, destfile = temp_3, quiet = FALSE)
+unzip(temp_3, exdir = temp_4)
+
+# Prepare 2016 data to be read from downloaded source
+f2016CensusData <- "\\SAPS2016_CTY31.csv"
+f2016CensusData <- paste(temp_4,f2016CensusData, sep = "", collapse=NULL)
+
+
+# Prepare URL string for Census Theme Data for 2011 for Irish counties
+f2011CensusData <- "https://www.cso.ie/en/media/csoie/census/documents/saps2011files/AllThemesTablesCTY.csv"
 
 
 
-
-# Sum County Data into a single row
-
-# Group the counties and sum all socio-economic data for Ireland overall
-df2011CtyThemesSocioTotals <- sqldf("Select 'CTT' as GEOGID,
-                                    '2011' as Year,
-                                     sum(GroupA) as GrpA,
-                                     sum(GroupB) as GrpB,
-                                     sum(GroupC) as GrpC,
-                                     sum(GroupD) as GrpD,
-                                     sum(GroupE) as GrpE,
-                                     sum(GroupF) as GrpF,
-                                     sum(GroupG) as GrpG,
-                                     sum(GroupH) as GrpH,
-                                     sum(GroupI) as GrpI,
-                                     sum(GroupJ) as GrpJ,
-                                     sum(GroupZ) as GrpZ
-                                     from df2011CountySocioThemes
-                                     group by Year")
-
-head(df2011CtyThemesSocioTotals)
-str(df2011CtyThemesSocioTotals)
+# Set up array of file names to be loaded in sequence
+arrCensusThemeFiles <- c(f2011CensusData, f2016CensusData)
+arrCensusThemeYears <- c('2011','2016')
 
 
 
-# Pivot County Data for numbers in Each Socio-economic Group
-df2011CtyThemesSocioTotals_Reshape <- df2011CtyThemesSocioTotals %>% 
-  pivot_longer(c(GrpA,
-                 GrpB,
-                 GrpC,
-                 GrpD,
-                 GrpE,
-                 GrpF,
-                 GrpG,
-                 GrpH,
-                 GrpI,
-                 GrpJ,
-                 GrpZ), # values to pivot or reshape
-               names_to = "SocioEcon_Group", # Rename column for exam type (written or oral)
-               values_to = "Numbers_in_Group") # Re-name column containing the exam scores
-
-view(df2011CtyThemesSocioTotals_Reshape)
-str(df2011CtyThemesSocioTotals_Reshape)
+# Set up dataframe array to hold the 2011 and 2016 Census Theme data
+# Both sets of data will undergo the same transformation before
+# being merged in advance of graph generation
+arrDFYrCountySocioThemes          <- list()  # start with empty array for data loaded from files
+arrDFYrCountySocioThemes_Reshaped <- list()  # array to store dataframes after the data wrangling process
 
 
 
-# Plot socio-economic groups
+# Iterate through the 2011 and 2016 files and manipulate the socio-economic data for visualisation
+for (i in 1:(length(arrCensusThemeFiles))) {
 
-#sort x-axis variable in alphabetical order - top down from Group A to Z
-level_order <- c('GrpZ',
-                 'GrpJ',
-                 'GrpI',
-                 'GrpH',
-                 'GrpG',
-                 'GrpF',
-                 'GrpE',
-                 'GrpD',
-                 'GrpC',
-                 'GrpB',
-                 'GrpA')
+  # Select only the required Socio-economic data 
+  # Rename the columns to increase understanding of the data
+  arrDFYrCountySocioThemes[[i]] <- read_delim(arrCensusThemeFiles[i], 
+                                        show_col_types = FALSE) %>%   # Read Census 2011 data from CSO website
+    select(GEOGID, GEOGDESC, # Only select the county identifier and the numbers of people in each
+            T9_2_PA,         # Socio-economic group
+            T9_2_PB,
+            T9_2_PC,
+            T9_2_PD,
+            T9_2_PE,
+            T9_2_PF,
+            T9_2_PG,
+            T9_2_PH,
+            T9_2_PI,
+            T9_2_PJ,
+            T9_2_PZ) %>%
+    rename(GroupA = T9_2_PA,  # Rename Columns to improve readability
+           GroupB = T9_2_PB,
+           GroupC = T9_2_PC,
+           GroupD = T9_2_PD,
+           GroupE = T9_2_PE,
+           GroupF = T9_2_PF,
+           GroupG = T9_2_PG,
+           GroupH = T9_2_PH,
+           GroupI = T9_2_PI,
+           GroupJ = T9_2_PJ,
+           GroupZ = T9_2_PZ)
+  
+
+  # Create dataframe for year in array - 2011 or 2016  
+  dfThisYrCountySocioThemes <- arrDFYrCountySocioThemes[[i]]
+  
+  # Add Year Value to dataframe
+  dfThisYrCountySocioThemes$Year <- arrCensusThemeYears[i]
+  
+  
+  # Sum County Data into a single row
+  
+  # Group the counties and sum all socio-economic data for Ireland overall
+  dfThisYrCtyThemesSocioTotals <- sqldf("Select 'CTT' as GEOGID,
+                                       Year,
+                                       sum(GroupA) as GrpA,
+                                       sum(GroupB) as GrpB,
+                                       sum(GroupC) as GrpC,
+                                       sum(GroupD) as GrpD,
+                                       sum(GroupE) as GrpE,
+                                       sum(GroupF) as GrpF,
+                                       sum(GroupG) as GrpG,
+                                       sum(GroupH) as GrpH,
+                                       sum(GroupI) as GrpI,
+                                       sum(GroupJ) as GrpJ,
+                                       sum(GroupZ) as GrpZ
+                                       from dfThisYrCountySocioThemes
+                                       group by Year")
+
+  
+  
+  # Pivot County Data for numbers in Each Socio-economic Group
+  dfThisYrCtyThemesSocioTotals_Reshape <- dfThisYrCtyThemesSocioTotals %>% 
+    pivot_longer(c(GrpA,
+                   GrpB,
+                   GrpC,
+                   GrpD,
+                   GrpE,
+                   GrpF,
+                   GrpG,
+                   GrpH,
+                   GrpI,
+                   GrpJ,
+                   GrpZ), # values to pivot or reshape
+                 names_to = "SocioEcon_Group", # Rename column for exam type (written or oral)
+                 values_to = "Numbers_in_Group") # Re-name column containing the exam scores
+
+  
+  #Sort x-axis variable in alphabetical order for each table- top down from Group A to Z
+  level_order <- c('GrpZ',
+                   'GrpJ',
+                   'GrpI',
+                   'GrpH',
+                   'GrpG',
+                   'GrpF',
+                   'GrpE',
+                   'GrpD',
+                   'GrpC',
+                   'GrpB',
+                   'GrpA')
+  
+  
+  # Set up dataframe in array after data manipulation complete
+  arrDFYrCountySocioThemes_Reshaped[[i]] <- dfThisYrCtyThemesSocioTotals_Reshape
+
+}
+
+# Merge the 2011 and 2016 dataframes and plot the comparisons in a horizontal bar chart
+
+# Merge dataframes
+dfFinal2011_2016SocEconCensus <- merge(arrDFYrCountySocioThemes_Reshaped[[1]], arrDFYrCountySocioThemes_Reshaped[[2]],all=TRUE)
 
 
-gg1 <- ggplot(data=df2011CtyThemesSocioTotals_Reshape, aes(x = factor(SocioEcon_Group, level = level_order), 
+# Set up legend so that '2016' is on top
+dfFinal2011_2016SocEconCensus$Year <- factor(dfFinal2011_2016SocEconCensus$Year, levels = c("2016", "2011"))
+
+# Generate Horizonatal Bar Chart
+gg1 <- ggplot(data=dfFinal2011_2016SocEconCensus, aes(x = factor(SocioEcon_Group, level = level_order), 
                                                            y=Numbers_in_Group, fill=Year)) +
   geom_bar(stat="identity", position=position_dodge(), colour="black") +
   labs(x = "Socio-Economic Groups", y = "Population (numbers)",                                                          
-       title = "Breakdown of Socio-Economic Groups (2011) for Ireland",
-       subtitle = "Sources: Census 2011", 
+       title = "Breakdown of Socio-Economic Groups (2011 v 2016) for Ireland",
+       subtitle = "Sources: Census 2011 + 2016", 
        caption = "Plot by C.Finegan d21124026") +  
   theme(legend.position = "right",
         plot.title = element_text(size = 22),
         axis.title = element_text(size = 19),
         axis.text.y = element_text(size=12, face="bold", colour = "black"),
         axis.text.x = element_text(size=12, face="bold", colour = "black")) + 
-  scale_fill_discrete(labels=c('2011', '2016'),name = "Year") +
+  scale_fill_discrete(labels=c('2016', '2011'),name = "Year") +
   scale_y_continuous(labels = comma) +
-  coord_flip()
+  # Tidy up axis descriptions of socio-economic groups
+  scale_x_discrete(labels = c("Group Z","Group J","Group I","Group H",
+      "Group G","Group F","Group E","Group D","Group C","Group B","Group A")) +
+  coord_flip() +
+  scale_fill_manual(values=c("#E69F00","#999999"))
 print(gg1)
 
 
