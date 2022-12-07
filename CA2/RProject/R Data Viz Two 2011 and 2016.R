@@ -1,5 +1,6 @@
 # -------------------------------------------------- #
-#
+# -------------------------------------------------- #
+
 # Data Visualisation Assignment 2
 # Visualisations in R
 #
@@ -11,6 +12,8 @@
 
 
 # Visualisation Two - Socio-economic group comparison
+# Census 2011 v Census 2016
+# -------------------------------------------------- #
 # -------------------------------------------------- #
 
 
@@ -26,35 +29,51 @@ library(scales)
 
 
 
+# ---------------------------------------------------- #
+# Download Census Theme Data for 2016 for Irish counties
+# ---------------------------------------------------- #
 
-# Load Census Theme Data for 2016 for Irish counties
+# Prepare URL string with location on GitHub of ZIP file with Census 2016 'Theme' data
 sGitHub_Datasource1_2016 <-"https://github.com/JackDaedalus/DataVizLabs/raw/"
 sGitHub_Datasource2_2016 <- paste(sGitHub_Datasource1_2016,"main/CA2/", sep = "", collapse=NULL)
 sGitHub_Datafile_2016 <- "SAPS2016_CTY31.zip"
 sGitHub_Datasource_2016 <- paste(sGitHub_Datasource2_2016,sGitHub_Datafile_2016, sep = "", collapse=NULL)
-
 f2016CTY_data <- sGitHub_Datasource_2016
 
-# Download zip fril from GitHub and extract 2016 Theme data for Irish counties
+
+# Download zip file from from GitHub and extract 2016 Theme data for Irish counties
 temp_3 <- tempfile()
 temp_4 <- tempfile()
 source <- f2016CTY_data
 temp_3 <- curl_download(url = source, destfile = temp_3, quiet = FALSE)
 unzip(temp_3, exdir = temp_4)
 
-# Prepare 2016 data to be read from downloaded source
+# Prepare location string of downloaded 2016 Census data CSV file 
 f2016CensusData <- "\\SAPS2016_CTY31.csv"
 f2016CensusData <- paste(temp_4,f2016CensusData, sep = "", collapse=NULL)
 
+
+
+# ---------------------------------------------------- #
+# Prepare URL for download of Census Theme Data for 2011 
+# for Irish counties
+# ---------------------------------------------------- #
 
 # Prepare URL string for Census Theme Data for 2011 for Irish counties
 f2011CensusData <- "https://www.cso.ie/en/media/csoie/census/documents/saps2011files/AllThemesTablesCTY.csv"
 
 
 
-# Set up array of file names to be loaded in sequence
+
+
+# -----------------------------------------------------#
+# Prepare sequence of Census data to be downloaded and 
+# read into dataframes for processing
+# -----------------------------------------------------#
+
+# Set up array of Census file names to be loaded in sequence
 arrCensusThemeFiles <- c(f2011CensusData, f2016CensusData)
-arrCensusThemeYears <- c('2011','2016')
+arrCensusThemeYears <- c('2011','2016') # 2011 data is downloaded first for manipulation
 
 
 
@@ -66,7 +85,11 @@ arrDFYrCountySocioThemes_Reshaped <- list()  # array to store dataframes after t
 
 
 
-# Iterate through the 2011 and 2016 files and manipulate the socio-economic data for visualisation
+# -----------------------------------------------------#
+# Iterate through the 2011 and 2016 files and manipulate 
+# the socio-economic data for visualisation
+# -----------------------------------------------------#
+
 for (i in 1:(length(arrCensusThemeFiles))) {
 
   # Select only the required Socio-economic data 
@@ -101,12 +124,11 @@ for (i in 1:(length(arrCensusThemeFiles))) {
   # Create dataframe for year in array - 2011 or 2016  
   dfThisYrCountySocioThemes <- arrDFYrCountySocioThemes[[i]]
   
-  # Add Year Value to dataframe
+  # Add Year Value as label to dataframe
   dfThisYrCountySocioThemes$Year <- arrCensusThemeYears[i]
   
   
   # Sum County Data into a single row
-  
   # Group the counties and sum all socio-economic data for Ireland overall
   dfThisYrCtyThemesSocioTotals <- sqldf("Select 'CTT' as GEOGID,
                                        Year,
@@ -126,7 +148,7 @@ for (i in 1:(length(arrCensusThemeFiles))) {
 
   
   
-  # Pivot County Data for numbers in Each Socio-economic Group
+  # Pivot County Data for numbers in each Socio-economic Group
   dfThisYrCtyThemesSocioTotals_Reshape <- dfThisYrCtyThemesSocioTotals %>% 
     pivot_longer(c(GrpA,
                    GrpB,
@@ -143,7 +165,7 @@ for (i in 1:(length(arrCensusThemeFiles))) {
                  values_to = "Numbers_in_Group") # Re-name column containing the exam scores
 
   
-  #Sort x-axis variable in alphabetical order for each table- top down from Group A to Z
+  #Sort x-axis variable in alphabetical order for each table - top down from Group A to Z
   level_order <- c('GrpZ',
                    'GrpJ',
                    'GrpI',
@@ -162,7 +184,12 @@ for (i in 1:(length(arrCensusThemeFiles))) {
 
 }
 
-# Merge the 2011 and 2016 dataframes and plot the comparisons in a horizontal bar chart
+
+
+# -----------------------------------------------------#
+# Merge the 2011 and 2016 dataframes and plot the 
+# comparisons in a horizontal bar chart
+# -----------------------------------------------------#
 
 # Merge dataframes
 dfFinal2011_2016SocEconCensus <- merge(arrDFYrCountySocioThemes_Reshaped[[1]], arrDFYrCountySocioThemes_Reshaped[[2]],all=TRUE)
@@ -171,7 +198,7 @@ dfFinal2011_2016SocEconCensus <- merge(arrDFYrCountySocioThemes_Reshaped[[1]], a
 # Set up legend so that '2016' is on top
 dfFinal2011_2016SocEconCensus$Year <- factor(dfFinal2011_2016SocEconCensus$Year, levels = c("2016", "2011"))
 
-# Generate Horizonatal Bar Chart
+# Generate Horizontal Bar Chart
 gg1 <- ggplot(data=dfFinal2011_2016SocEconCensus, aes(x = factor(SocioEcon_Group, level = level_order), 
                                                            y=Numbers_in_Group, fill=Year)) +
   geom_bar(stat="identity", position=position_dodge(), colour="black") +
