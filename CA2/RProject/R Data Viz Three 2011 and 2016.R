@@ -18,7 +18,7 @@
 # -------------------------------------------------- #
 
 #install.packages("gghighlight")
-#install.packages("ggthemes") # Install 
+#install.packages("ggthemes") 
 
 # load required libraries
 library(curl)
@@ -154,6 +154,14 @@ for (i in 1:(length(arrCensusThemeFiles))) {
     
   }
 
+
+
+  # ------------------------------------------------------------------#
+  # Data maniulation routines to add calculated field for 
+  # each county for percentage of population in Social 
+  # Class A ad B, and in 'Very God Health'
+  # ------------------------------------------------------------------#
+
   # Create dataframe for year in array - 2011 or 2016  
   dfThisYrCountySocioThemes <- arrDFYrCountySocioThemes[[i]]
   
@@ -178,10 +186,11 @@ for (i in 1:(length(arrCensusThemeFiles))) {
   
   
   
-  # -----------------------------------------------------#
-  # Merge the 2011 and 2016 dataframes and plot the 
-  # comparisons in a horizontal bar chart
-  # -----------------------------------------------------#
+  # -------------------------------------------------------------------#
+  # Prepare elements to generate and improve Scatter Plot
+  # rendering of relationship between Social Class A/B and
+  # 'Very Good Health'
+  # -------------------------------------------------------------------#
   
   # Copy data to a dataframe with a shorter name to simplify
   # the code generating the graphs
@@ -197,17 +206,17 @@ for (i in 1:(length(arrCensusThemeFiles))) {
                           sep = "", collapse=NULL)
   
   
-  # These parameter works best for highlighting specific data points 
-  # in the 2011/2016 Scatterplot graph
+  # These parameters work best for highlighting specific data points 
+  # for county regions in the 2011/2016 Scatterplot graphs
   UpperGroupAB_Pct  <- 27
   LowerGroupAB_Pct  <- 16 
   LowerVGHealth_Pct <- 56
 
   
-  # Generate Horizontal Bar Chart
+  # Generate Scatter Plot Grah
   gg1 <- ggplot(data=dfCensusGraph[[i]], aes(x = GroupAB_Pct, y=VGHealth_Pct)) +
     geom_point(colour="black", size=3, shape=21, fill="red") +
-    # Highlight on Scatter plot the county area at the upper and lower end of 
+    # Highlight on Scatter plot the county areas at the upper and lower end of 
     # the socio-economic groups and health rating.
     gghighlight(((GroupAB_Pct>=UpperGroupAB_Pct|GroupAB_Pct<=LowerGroupAB_Pct) 
                   | VGHealth_Pct<=LowerVGHealth_Pct), 

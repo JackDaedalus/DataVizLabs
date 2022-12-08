@@ -1,5 +1,6 @@
-# ------------------------------------------------ #
-#
+# -------------------------------------------------- #
+# -------------------------------------------------- #
+
 # Data Visualisation Assignment 2
 # Visualisations in R
 #
@@ -8,7 +9,12 @@
 # TU060 Data Science MSc
 #
 # December 2022
-# ------------------------------------------------ #
+
+
+# Visualisation One - Comparison of Unemployment Rates 
+# Per County in Ireland in Census 2011 data 
+# -------------------------------------------------- #
+# -------------------------------------------------- #
 
 
 # load required libraries
@@ -24,9 +30,12 @@ library(dplyr)
 
 
 
+# There were challenges with accessing data file locations for all datasets.
+# To allow the R code to run anywhere the required data files have been hsted 
+# on GitHub where required.
 
-#"https://github.com/JackDaedalus/DataVizLabs/raw/dfa3d486a5ea74a588e9768141b35f570eff3c57/CA2/Counties_-_OSi_National_Statutory_Boundaries_-_2019_-_Generalised_20m.zip"
-
+# Build URL connecting string to download OSI country boundaries data file 
+# for counties in the Republic of Ireland
 sGitHub_Datasource1 <-"https://github.com/JackDaedalus/DataVizLabs/raw/"
 sGitHub_Datasource2 <- paste(sGitHub_Datasource1,"dfa3d486a5ea74a588e9768141b35f570eff3c57/CA2/", sep = "", collapse=NULL)
 sGitHub_Datafile <- "Counties_-_OSi_National_Statutory_Boundaries_-_2019_-_Generalised_20m.zip"
@@ -34,7 +43,7 @@ sGitHub_Datasource <- paste(sGitHub_Datasource2,sGitHub_Datafile, sep = "", coll
 
 county_map_source <- sGitHub_Datasource
 
-
+# Download zip file from from GitHub and extract 2019 OSI County data for 26 Irish counties
 temp_1 <- tempfile()
 temp_2 <- tempfile()
 source <- county_map_source
@@ -44,17 +53,21 @@ unzip(temp_1, exdir = temp_2)
 
 
 
-# read the shape file
+# Read the shape file extracted from the downloaded zip file
 spdf <- readShapePoly(file.path(temp_2,"Counties___OSi_National_Statutory_Boundaries___Generalised_20m.shp"))
 
-# make it ggplot-friendly
+# Generate a new dataframe that will wrk with ggplot to generate Ireland county map
 spdf@data$id <- rownames(spdf@data)
 spdf.points <- fortify(spdf, region="id")
 counties <- inner_join(spdf.points, spdf@data, by="id")
 
 
-
+# ----------------------------------------------------------#
 # Load Census Theme Data for 2011 for Irish counties
+# ----------------------------------------------------------#
+
+
+# This data is available directly from the CSO website
 # Select only the required unemployment data 
 # Rename the columns to increase understanding of the data
 df2011CountyThemes <- read_delim("https://www.cso.ie/en/media/csoie/census/documents/saps2011files/AllThemesTablesCTY.csv",show_col_types = FALSE) %>%
@@ -62,15 +75,17 @@ df2011CountyThemes <- read_delim("https://www.cso.ie/en/media/csoie/census/docum
   rename(Looking_for_Work = T8_1_LFFJT, Unemployed = T8_1_ULGUPJT, Total_Workforce = T8_1_TT)
 
 
-# The Census theme data breaks down the counties in certain cases. This data needs to be merge to match 
+
+# ----------------------------------------------------------------#
+# The Census theme data breaks down the counties in certain cases 
+# for metropolitan areas. This data needs to be re-merged to match 
 # the county boundaries in the OSI dataframe
+# ----------------------------------------------------------------#
 
 
 # Start with Dublin...
 df2011DublinThemes <- df2011CountyThemes %>%
   filter(GEOGID %in% c("C02","C03","C04","C05"))
-
-head(df2011DublinThemes)
 
 # Group the country regions and sum all unemployment data for Dublin overall
 df2011DublinThemesTotal <- sqldf("Select 'C35' as GEOGID,
@@ -81,16 +96,12 @@ df2011DublinThemesTotal <- sqldf("Select 'C35' as GEOGID,
                                   from df2011DublinThemes
                                   group by Dublin")
 
-head(df2011DublinThemesTotal)
-str(df2011DublinThemesTotal)
 
 
 
 # The Cork areas are combined next...
 df2011CorkThemes <- df2011CountyThemes %>%
   filter(GEOGID %in% c("C17","C18"))
-
-head(df2011CorkThemes)
 
 # Group the country regions and sum all unemployment data for Dublin overall
 df2011CorkThemesTotal <- sqldf("Select 'C36' as GEOGID,
@@ -101,19 +112,12 @@ df2011CorkThemesTotal <- sqldf("Select 'C36' as GEOGID,
                                   from df2011CorkThemes
                                   group by Cork")
 
-head(df2011CorkThemesTotal)
-str(df2011CorkThemesTotal)
-
-
-
 
 
 
 # The Limerick areas are combined next...
 df2011LimerickThemes <- df2011CountyThemes %>%
   filter(GEOGID %in% c("C20","C21"))
-
-head(df2011LimerickThemes)
 
 # Group the country regions and sum all unemployment data for Limerick overall
 df2011LimerickThemesTotal <- sqldf("Select 'C36' as GEOGID,
@@ -124,18 +128,12 @@ df2011LimerickThemesTotal <- sqldf("Select 'C36' as GEOGID,
                                   from df2011LimerickThemes
                                   group by Limerick")
 
-head(df2011LimerickThemesTotal)
-str(df2011LimerickThemesTotal)
-
-
 
 
 
 # The Tipperary areas are combined next...
 df2011TipperaryThemes <- df2011CountyThemes %>%
   filter(GEOGID %in% c("C22","C23"))
-
-head(df2011TipperaryThemes)
 
 # Group the country regions and sum all unemployment data for Tipperary overall
 df2011TipperaryThemesTotal <- sqldf("Select 'C37' as GEOGID,
@@ -146,20 +144,12 @@ df2011TipperaryThemesTotal <- sqldf("Select 'C37' as GEOGID,
                                   from df2011TipperaryThemes
                                   group by Tipperary")
 
-head(df2011TipperaryThemesTotal)
-str(df2011TipperaryThemesTotal)
-
-
-
-
 
 
 
 # The Waterford areas are combined next...
 df2011WaterfordThemes <- df2011CountyThemes %>%
   filter(GEOGID %in% c("C24","C25"))
-
-head(df2011WaterfordThemes)
 
 # Group the country regions and sum all unemployment data for Waterford overall
 df2011WaterfordThemesTotal <- sqldf("Select 'C38' as GEOGID,
@@ -170,21 +160,12 @@ df2011WaterfordThemesTotal <- sqldf("Select 'C38' as GEOGID,
                                   from df2011WaterfordThemes
                                   group by Waterford")
 
-head(df2011WaterfordThemesTotal)
-str(df2011WaterfordThemesTotal)
-
-
-
-
-
 
 
 
 # The Galway areas are combined next...
 df2011GalwayThemes <- df2011CountyThemes %>%
   filter(GEOGID %in% c("C26","C27"))
-
-head(df2011GalwayThemes)
 
 # Group the country regions and sum all unemployment data for Galway overall
 df2011GalwayThemesTotal <- sqldf("Select 'C39' as GEOGID,
@@ -194,11 +175,6 @@ df2011GalwayThemesTotal <- sqldf("Select 'C39' as GEOGID,
                                   sum(Total_Workforce)
                                   from df2011GalwayThemes
                                   group by Galway")
-
-head(df2011GalwayThemesTotal)
-str(df2011GalwayThemesTotal)
-
-
 
 
 
@@ -214,6 +190,13 @@ df2011CountyThemes <- data.frame(rbind(as.matrix(df2011CountyThemes), as.matrix(
 df2011CountyThemes <- data.frame(rbind(as.matrix(df2011CountyThemes), as.matrix(df2011GalwayThemesTotal)))    # Galway
 
 
+
+# ----------------------------------------------------------------#
+# Additional data manipulation routines to reformat data and add
+# calculated fields to 2011 dataframe
+# ----------------------------------------------------------------#
+
+
 # Convert county names to upper case to match map dataframe
 df2011CountyThemes <- mutate_all(df2011CountyThemes, .funs=toupper)
 
@@ -223,10 +206,6 @@ df2011CountyThemes$Looking_for_Work = as.numeric(as.character(df2011CountyThemes
 df2011CountyThemes$Unemployed = as.numeric(as.character(df2011CountyThemes$Unemployed))
 df2011CountyThemes$Total_Workforce = as.numeric(as.character(df2011CountyThemes$Total_Workforce))
 
-
-head(df2011CountyThemes)
-tail(df2011CountyThemes)
-str(df2011CountyThemes)
 
 
 # Remove the redundant county sub-breakdowns for unemployment data
@@ -240,49 +219,27 @@ df2011CountyThemes <- df2011CountyThemes %>%
 df2011CountyThemes$Unemploy_Rate <- ((df2011CountyThemes$Looking_for_Work + df2011CountyThemes$Unemployed) / df2011CountyThemes$Total_Workforce) * 100
 
 
-head(df2011CountyThemes)
-tail(df2011CountyThemes)
-str(df2011CountyThemes)
 
 
-head(counties)
-head(df2011CountyThemes)
-
-
-
-# Using cut to create categorical bands for rates of unemployment
+# Using cut to create 2011 categorical bands for rates of unemployment
 df2011CountyThemes$Unemploy_Pct <- cut(df2011CountyThemes$Unemploy_Rate, 
                                        breaks = c(0, 6.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 99), 
                                        labels = c("<7%", "7-10%", "10-11%", "11-12%", "12-13%", "13-14%", "14-15%", "15%+"))
-
-
-str(df2011CountyThemes)
-view(df2011CountyThemes)
 
 
 
 # Join dataframe on county names
 dfCountyMap <- left_join(counties, df2011CountyThemes, by = "COUNTY")
 
+# Set up factr in dataframe for visualisation
 dfCountyMap$COUNTY <- factor(dfCountyMap$COUNTY)
 
-head(dfCountyMap)
-tail(dfCountyMap)
-
-view(df2011CountyThemes)
 
 
-# define a base map layer
-#IRLCounty_BaseLayer <- ggplot(dfCountyMap) + 
-#  aes(long, lat, group=group) +
-#  geom_polygon(colour="grey")
+#---------------------------------------------------------------------------------#
+# Generate the 2011 Country Map Plot with Unemployment Rates
+#---------------------------------------------------------------------------------#
 
-# plot a data column 
-#IRLCounty_BaseLayer + aes(fill=Unemploy_Pct)
-
-
-
-# plot it
 ggplot(dfCountyMap) + 
   geom_polygon(colour="black", aes(x=long, y=lat, group=group, fill=Unemploy_Pct)) + 
   labs(x = NULL, y = NULL,                                                          
@@ -297,8 +254,8 @@ ggplot(dfCountyMap) +
         plot.caption.position = 'plot',
         plot.title.position = 'plot',
         legend.position = "bottom") + 
-  #scale_fill_brewer(palette="OrRd") + 
-  labs(fill = "Unemployment Rate (%)")+
+  labs(fill = "Unemployment Rate (%)") +
+  # Colour scale for unemployment rate
   scale_fill_brewer(palette="YlOrRd")
 
 

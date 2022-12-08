@@ -63,9 +63,6 @@ f2016CensusData <- paste(temp_4,f2016CensusData, sep = "", collapse=NULL)
 f2011CensusData <- "https://www.cso.ie/en/media/csoie/census/documents/saps2011files/AllThemesTablesCTY.csv"
 
 
-
-
-
 # -----------------------------------------------------#
 # Prepare sequence of Census data to be downloaded and 
 # read into dataframes for processing
@@ -95,7 +92,7 @@ for (i in 1:(length(arrCensusThemeFiles))) {
   # Select only the required Socio-economic data 
   # Rename the columns to increase understanding of the data
   arrDFYrCountySocioThemes[[i]] <- read_delim(arrCensusThemeFiles[i], 
-                                        show_col_types = FALSE) %>%   # Read Census 2011 data from CSO website
+                                        show_col_types = FALSE) %>%   # Read Census data 
     select(GEOGID, GEOGDESC, # Only select the county identifier and the numbers of people in each
             T9_2_PA,         # Socio-economic group
             T9_2_PB,
@@ -161,8 +158,8 @@ for (i in 1:(length(arrCensusThemeFiles))) {
                    GrpI,
                    GrpJ,
                    GrpZ), # values to pivot or reshape
-                 names_to = "SocioEcon_Group", # Rename column for exam type (written or oral)
-                 values_to = "Numbers_in_Group") # Re-name column containing the exam scores
+                 names_to = "SocioEcon_Group", # Rename column for Social Class Group
+                 values_to = "Numbers_in_Group") # Re-name column containing pop. numbers
 
   
   #Sort x-axis variable in alphabetical order for each table - top down from Group A to Z
@@ -198,7 +195,13 @@ dfFinal2011_2016SocEconCensus <- merge(arrDFYrCountySocioThemes_Reshaped[[1]], a
 # Set up legend so that '2016' is on top
 dfFinal2011_2016SocEconCensus$Year <- factor(dfFinal2011_2016SocEconCensus$Year, levels = c("2016", "2011"))
 
+
+# ---------------------------------------------------------------------#
 # Generate Horizontal Bar Chart
+# Contains bars for each Social Class
+# Grouped by year
+# ---------------------------------------------------------------------#
+
 gg1 <- ggplot(data=dfFinal2011_2016SocEconCensus, aes(x = factor(SocioEcon_Group, level = level_order), 
                                                            y=Numbers_in_Group, fill=Year)) +
   geom_bar(stat="identity", position=position_dodge(), colour="black") +
@@ -211,7 +214,9 @@ gg1 <- ggplot(data=dfFinal2011_2016SocEconCensus, aes(x = factor(SocioEcon_Group
         axis.title = element_text(size = 19),
         axis.text.y = element_text(size=12, face="bold", colour = "black"),
         axis.text.x = element_text(size=12, face="bold", colour = "black")) + 
+  # Rename legend      
   scale_fill_discrete(labels=c('2016', '2011'),name = "Year") +
+  # Make population axis more readable
   scale_y_continuous(labels = comma) +
   # Tidy up axis descriptions of socio-economic groups
   scale_x_discrete(labels = c("Group Z","Group J","Group I","Group H",
