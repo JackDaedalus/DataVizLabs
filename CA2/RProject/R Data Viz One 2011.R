@@ -31,7 +31,7 @@ library(dplyr)
 
 
 # There were challenges with accessing data file locations for all datasets.
-# To allow the R code to run anywhere the required data files have been hsted 
+# To allow the R code to run anywhere the required data files have been hosted 
 # on GitHub where required.
 
 # Build URL connecting string to download OSI country boundaries data file 
@@ -56,7 +56,7 @@ unzip(temp_1, exdir = temp_2)
 # Read the shape file extracted from the downloaded zip file
 spdf <- readShapePoly(file.path(temp_2,"Counties___OSi_National_Statutory_Boundaries___Generalised_20m.shp"))
 
-# Generate a new dataframe that will wrk with ggplot to generate Ireland county map
+# Generate a new dataframe that will work with ggplot to generate Ireland county map
 spdf@data$id <- rownames(spdf@data)
 spdf.points <- fortify(spdf, region="id")
 counties <- inner_join(spdf.points, spdf@data, by="id")
@@ -221,7 +221,7 @@ df2011CountyThemes$Unemploy_Rate <- ((df2011CountyThemes$Looking_for_Work + df20
 
 
 
-# Using cut to create 2011 categorical bands for rates of unemployment
+# Using cut() function to create 2011 categorical bands for rates of unemployment
 df2011CountyThemes$Unemploy_Pct <- cut(df2011CountyThemes$Unemploy_Rate, 
                                        breaks = c(0, 6.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 99), 
                                        labels = c("<7%", "7-10%", "10-11%", "11-12%", "12-13%", "13-14%", "14-15%", "15%+"))
@@ -231,7 +231,7 @@ df2011CountyThemes$Unemploy_Pct <- cut(df2011CountyThemes$Unemploy_Rate,
 # Join dataframe on county names
 dfCountyMap <- left_join(counties, df2011CountyThemes, by = "COUNTY")
 
-# Set up factr in dataframe for visualisation
+# Set up factor in dataframe for visualisation
 dfCountyMap$COUNTY <- factor(dfCountyMap$COUNTY)
 
 

@@ -1,3 +1,21 @@
+---
+title: "DataViz1b"
+author: "D21124026"
+date: "2022-12-09"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r Viz1b}
 # -------------------------------------------------- #
 # -------------------------------------------------- #
 
@@ -111,6 +129,7 @@ df2016CountyThemes <- read_delim(file.path(temp_4,"SAPS2016_CTY31.csv"),show_col
 df2016DublinThemes <- df2016CountyThemes %>%
   filter(GEOGID %in% c("CTY31_DC","CTY31_DR","CTY31_FL","CTY31_SD"))
 
+head(df2016DublinThemes)
 
 # Group the country regions and sum all unemployment data for Dublin overall
 df2016DublinThemesTotal <- sqldf("Select 'CTY32_DC' as GEOGID,
@@ -242,3 +261,5 @@ ggplot(dfCountyMap) +
   scale_fill_brewer(palette="YlOrRd")
 
 
+
+```
